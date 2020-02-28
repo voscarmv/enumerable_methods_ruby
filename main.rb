@@ -1,5 +1,8 @@
+# rubocop:disable Metrics/ModuleLength
+# rubocop:disable Metrics/MethodLength
+# rubocop:disable Metrics/CyclomaticComplexity
+# rubocop:disable Metrics/PerceivedComplexity
 module Enumerable
-
   def make_array(input)
     if input.class == Range
       input.to_a
@@ -11,9 +14,11 @@ module Enumerable
   def my_each
     arr = make_array(self)
     if block_given?
-      for i in (0..arr.length-1) do
+      i = 0
+      while i < arr.length - 1
         yield(arr[i])
-      end  
+        i += 1
+      end
     else
       arr.to_enum
     end
@@ -22,9 +27,11 @@ module Enumerable
   def my_each_2
     arr = make_array(self)
     if block_given?
-      for i in (1..arr.length-1) do
+      i = 1
+      while i < arr.length - 1
         yield(arr[i])
-      end  
+        i += 1
+      end
     else
       arr.to_enum
     end
@@ -33,17 +40,17 @@ module Enumerable
   def my_each_with_index
     arr = make_array(self)
     if block_given?
-      [0..arr.length - 1].my_each {|i| yield(arr[i],i)}
+      [0..arr.length - 1].my_each { |i| yield(arr[i], i) }
     else
       arr.to_enum
     end
-  end 
+  end
 
   def my_select
     arr = make_array(self)
     if block_given?
-      output = Array.new
-      arr.my_each {|i| output << i if yield(i)}
+      output = []
+      arr.my_each { |i| output << i if yield(i) }
       output
     else
       arr.to_enum
@@ -79,18 +86,21 @@ module Enumerable
       my_none_check { |i| i =~ expr }
     elsif expr.class == Class
       my_none_check { |i| i.is_a? expr }
-    elsif block_given?  
+    elsif block_given?
       my_none_check { |i| yield(i) }
     else
       my_none_check { |i| i == false || i.nil? }
     end
   end
 
-  def my_count
+  def my_count(obj = nil)
     arr = make_array(self)
-    if block_given?
-      count = 0
-      arr.my_each {|i| count += 1 if yield(i)}
+    count = 0
+    if !obj.nil?
+      arr.my_each { |i| count += 1 if i == obj }
+      count
+    elsif block_given?
+      arr.my_each { |i| count += 1 if yield(i) }
       count
     else
       arr.length
@@ -99,12 +109,12 @@ module Enumerable
 
   def my_map(proc = nil)
     arr = make_array(self)
-    output = Array.new
+    output = []
     if proc.class == Proc
-      arr.my_each { |i| output << i if proc.call(i)}
+      arr.my_each { |i| output << proc.call(i) }
       output
     elsif block_given?
-      arr.my_each {|i| output << i if yield(i)}
+      arr.my_each { |i| output << yield(i) }
       output
     else
       arr.to_enum
@@ -134,49 +144,53 @@ module Enumerable
       end
     end
   end
-
 end
+# rubocop:enable Metrics/ModuleLength
+# rubocop:enable Metrics/MethodLength
+# rubocop:enable Metrics/CyclomaticComplexity
+# rubocop:enable Metrics/PerceivedComplexity
 
 def multiply_els(input)
   input.my_inject(:*)
 end
 
-[1, 2, 3, 4].my_each {|x| puts "number: #{x}"}
+[1, 2, 3, 4].my_each { |x| puts "number: #{x}" }
 
-[1, 2, 3, 4].my_each_with_index {|x, y| puts "number #{y}: #{x}"}
+[1, 2, 3, 4].my_each_with_index { |x, y| puts "number #{y}: #{x}" }
 
 [1, 2, 3, 4].my_select { |i| i > 1 }
 
-[0, 0, 0, 1, 2, 0].my_all? {|i| i < 5}
-%w(oscar, apple, dark).my_all?(/a/)
+[0, 0, 0, 1, 2, 0].my_all? { |i| i < 5 }
+%w[oscar apple dark].my_all?(/a/)
 [1, 2i, 3.14].my_all?(Numeric)
 
-%w{ant bear cat}.my_none? { |word| word.length >= 4 }
-%w{ant bear cat}.my_none?(/d/)
+%w[ant bear cat].my_none? { |word| word.length >= 4 }
+%w[ant bear cat].my_none?(/d/)
 [1, 3.14, 42].my_none?(Float)
 
 ary = [1, 2, 4, 2]
-ary.count               #=> 4
-ary.count(2)            #=> 2
-ary.count{ |x| x%2==0 } #=> 3
+ary.my_count #=> 4
+ary.my_count(2) #=> 2
+ary.my_count { |x| x.even? } #=> 3
 
-(1..10).my_map { |i| i * 2 if i.even? } #=> [4, 8, 12, 16, 20]
+(1..4).map { |i| i*i }      #=> [1, 4, 9, 16]
+(1..4).collect { "cat"  }   #=> ["cat", "cat", "cat", "cat"]
 
 # Sum some numbers
-(5..10).my_inject(:+)                             #=> 45
+(5..10).my_inject(:+) #=> 45
 # Same using a block and inject
-(5..10).my_inject { |sum, n| sum + n }            #=> 45
+(5..10).my_inject { |sum, n| sum + n } #=> 45
 # Multiply some numbers
-(5..10).my_inject(1, :*)                          #=> 151200
+(5..10).my_inject(1, :*) #=> 151200
 # Same using a block
 (5..10).my_inject(1) { |product, n| product * n } #=> 151200
 # find the longest word
-longest = %w{ cat sheep bear }.my_inject do |memo, word|
-   memo.length > word.length ? memo : word
+longest = %w[cat sheep bear].my_inject do |memo, word|
+  memo.length > word.length ? memo : word
 end
-longest                                        #=> "sheep"
+puts longest #=> "sheep"
 
-multiply_els([2,4,5])
+multiply_els([2, 4, 5])
 
 myproc = proc { |i| i > 2 }
 [0, 0, 0, 1, 0, 2, 3, 4].my_map(myproc)

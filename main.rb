@@ -15,7 +15,7 @@ module Enumerable
     arr = make_array(self)
     if block_given?
       i = 0
-      while i < arr.length - 1
+      while i < arr.length
         yield(arr[i])
         i += 1
       end
@@ -28,7 +28,7 @@ module Enumerable
     arr = make_array(self)
     if block_given?
       i = 1
-      while i < arr.length - 1
+      while i < arr.length
         yield(arr[i])
         i += 1
       end

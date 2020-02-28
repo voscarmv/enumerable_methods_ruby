@@ -171,10 +171,10 @@ end
 ary = [1, 2, 4, 2]
 ary.my_count #=> 4
 ary.my_count(2) #=> 2
-ary.my_count { |x| x.even? } #=> 3
+ary.my_count(&:even?) #=> 3
 
-(1..4).map { |i| i*i }      #=> [1, 4, 9, 16]
-(1..4).collect { "cat"  }   #=> ["cat", "cat", "cat", "cat"]
+(1..4).map { |i| i * i } #=> [1, 4, 9, 16]
+(1..4).collect { 'cat' } #=> ["cat", "cat", "cat", "cat"]
 
 # Sum some numbers
 (5..10).my_inject(:+) #=> 45

@@ -62,6 +62,16 @@ module Enumerable
     end
   end
 
+  def my_count
+    if block_given?
+      count = 0
+      self.my_each {|i| count += 1 if yield(i)}
+      count
+    else
+      length
+    end
+  end
+
 end
 
 [1, 2, 3, 4].my_each {|x| puts "number: #{x}"}
@@ -77,5 +87,11 @@ end
 %w{ant bear cat}.my_none? { |word| word.length >= 4 }
 %w{ant bear cat}.my_none?(/d/)
 [1, 3.14, 42].my_none?(Float)
+
+ary = [1, 2, 4, 2]
+ary.count               #=> 4
+ary.count(2)            #=> 2
+ary.count{ |x| x%2==0 } #=> 3
+
 
 

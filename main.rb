@@ -10,6 +10,16 @@ module Enumerable
     end
   end
 
+  def my_each_with_index
+    if block_given?
+      (0..self.length-1).my_each { yield(self[i],i)}
+    else
+      self.to_enum
+    end
+  end
+
 end
 
 [1, 2, 3, 4].my_each {|x| puts "number: #{x}"}
+
+[1, 2, 3, 4].my_each_with_index {|x, y| puts "number #{y}: #{x}"}

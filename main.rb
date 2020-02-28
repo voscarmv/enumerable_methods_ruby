@@ -88,10 +88,12 @@ module Enumerable
       my_none_check { |i| i =~ expr }
     elsif expr.class == Class
       my_none_check { |i| i.is_a? expr }
+    elsif !expr.nil?
+      my_none_check { |i| i == expr }
     elsif block_given?
       my_none_check { |i| yield(i) }
     else
-      my_none_check { |i| i == false || i.nil? }
+      my_all_check { |i| i == false || i.nil? }
     end
   end
 
@@ -197,4 +199,4 @@ multiply_els([2, 4, 5])
 myproc = proc { |i| i > 2 }
 [0, 0, 0, 1, 0, 2, 3, 4].my_map(myproc)
 
-[1, 2, 3, 4, 5].my_all?
+[1, 2, 3, 4, 5].my_none?(7)

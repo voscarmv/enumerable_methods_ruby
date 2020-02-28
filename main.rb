@@ -97,10 +97,13 @@ module Enumerable
     end
   end
 
-  def my_map
+  def my_map(proc = nil)
     arr = make_array(self)
-    if block_given?
-      output = Array.new
+    output = Array.new
+    if proc.class == Proc
+      arr.my_each { |i| output << i if proc.call(i)}
+      output
+    elsif block_given?
       arr.my_each {|i| output << i if yield(i)}
       output
     else
@@ -174,3 +177,6 @@ end
 longest                                        #=> "sheep"
 
 multiply_els([2,4,5])
+
+myproc = proc { |i| i > 2 }
+[0, 0, 0, 1, 0, 2, 3, 4].my_map(myproc)

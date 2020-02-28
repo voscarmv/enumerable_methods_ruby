@@ -28,6 +28,21 @@ module Enumerable
     end
   end
 
+  def my_all_check
+    self.my_each do |i|
+      return false unless yield(i)
+    end
+    true
+  end
+
+  def my_none_check
+    self.my_each do |i|
+      return false if yield(i)
+    end
+    true
+  end
+  
+
 end
 
 [1, 2, 3, 4].my_each {|x| puts "number: #{x}"}
@@ -35,3 +50,7 @@ end
 [1, 2, 3, 4].my_each_with_index {|x, y| puts "number #{y}: #{x}"}
 
 [1, 2, 3, 4].my_select { |i| i > 1 }
+
+[0, 0, 0, 1, 2, 0].my_all_check {|i| i < 5}
+[0, 0, 0, 1, 2, 0].my_none_check {|i| i > 1}
+

@@ -1,12 +1,16 @@
 module Enumerable
 
   def my_each
+    arr = self
+    if self.class == Range
+      arr = self.to_a
+    end
     if block_given?
-      for i in (0..self.length-1) do
-        yield(self[i])
+      for i in (0..arr.length-1) do
+        yield(arr[i])
       end  
     else
-      self.to_enum
+      arr.to_enum
     end
   end
 
@@ -72,6 +76,16 @@ module Enumerable
     end
   end
 
+  def my_map
+    if block_given?
+      output = Array.new
+      self.my_each {|i| output << i if yield(i)}
+      output
+    else
+      self.to_enum
+    end
+  end
+
 end
 
 [1, 2, 3, 4].my_each {|x| puts "number: #{x}"}
@@ -93,5 +107,6 @@ ary.count               #=> 4
 ary.count(2)            #=> 2
 ary.count{ |x| x%2==0 } #=> 3
 
+(1..10).my_map { |i| i * 2 if i.even? } #=> [4, 8, 12, 16, 20]
 
 

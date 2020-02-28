@@ -12,7 +12,7 @@ module Enumerable
 
   def my_each_with_index
     if block_given?
-      (0..self.length-1).my_each { yield(self[i],i)}
+      [0..length - 1].my_each {|i| yield(self[i],i)}
     else
       self.to_enum
     end

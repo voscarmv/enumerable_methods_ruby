@@ -63,6 +63,12 @@ module Enumerable
     true
   end
 
+  def my_any_check
+    arr = make_array(self)
+    arr.my_each { |i| return true if yield(i) }
+    false
+  end
+
   def my_none_check
     arr = make_array(self)
     arr.my_each { |i| return false if yield(i) }
@@ -80,6 +86,20 @@ module Enumerable
       my_all_check { |i| yield(i) }
     else
       my_none_check { |i| i == false || i.nil? }
+    end
+  end
+
+  def my_any?(expr = nil)
+    if expr.class == Regexp
+      my_any_check { |i| i =~ expr }
+    elsif expr.class == Class
+      my_any_check { |i| i.is_a? expr }
+    elsif !expr.nil?
+      my_any_check { |i| i == expr }
+    elsif block_given?
+      my_any_check { |i| yield(i) }
+    else
+      my_any_check { |i| i != false && !i.nil? }
     end
   end
 
@@ -199,4 +219,4 @@ multiply_els([2, 4, 5])
 myproc = proc { |i| i > 2 }
 [0, 0, 0, 1, 0, 2, 3, 4].my_map(myproc)
 
-[1, 2, 3, 4, 5].my_none?(7)
+[false, false, nil].my_any?

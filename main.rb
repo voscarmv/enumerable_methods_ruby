@@ -50,6 +50,18 @@ module Enumerable
     end
   end
 
+  def my_none?(expr = nil)
+    if expr.class == Regexp
+      my_none_check { |i| i =~ expr }
+    elsif expr.class == Class
+      my_none_check { |i| i.is_a? expr }
+    elsif block_given?  
+      my_none_check { |i| yield(i) }
+    else
+      my_none_check { |i| i == false || i.nil? }
+    end
+  end
+
 end
 
 [1, 2, 3, 4].my_each {|x| puts "number: #{x}"}
@@ -59,10 +71,11 @@ end
 [1, 2, 3, 4].my_select { |i| i > 1 }
 
 [0, 0, 0, 1, 2, 0].my_all? {|i| i < 5}
-%w(oscar, apple, dark).my_all?(/b/)
-[1, 2i, 3.14].my_all?(Numeric) 
+%w(oscar, apple, dark).my_all?(/a/)
+[1, 2i, 3.14].my_all?(Numeric)
 
-#[0, 0, 0, 1, 2, 0].my_none {|i| i > 1}
-
+%w{ant bear cat}.my_none? { |word| word.length >= 4 }
+%w{ant bear cat}.my_none?(/d/)
+[1, 3.14, 42].my_none?(Float)
 
 

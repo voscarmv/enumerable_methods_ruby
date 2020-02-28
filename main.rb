@@ -29,19 +29,26 @@ module Enumerable
   end
 
   def my_all_check
-    self.my_each do |i|
-      return false unless yield(i)
-    end
+    self.my_each { |i| return false unless yield(i) }
     true
   end
 
   def my_none_check
-    self.my_each do |i|
-      return false if yield(i)
-    end
+    self.my_each { |i| return false if yield(i) }
     true
   end
-  
+
+  def my_all?(expr = nil)
+    if expr.class == Regexp
+      my_all_check { |i| i =~ expr }
+    elsif expr.class == Class
+      my_all_check { |i| i.is_a? expr }
+    elsif block_given?
+      my_all_check { |i| yield(i) }
+    else
+      my_all_check { |i| i == false || i.nil? }
+    end
+  end
 
 end
 
@@ -51,6 +58,11 @@ end
 
 [1, 2, 3, 4].my_select { |i| i > 1 }
 
-[0, 0, 0, 1, 2, 0].my_all_check {|i| i < 5}
-[0, 0, 0, 1, 2, 0].my_none_check {|i| i > 1}
+[0, 0, 0, 1, 2, 0].my_all? {|i| i < 5}
+%w(oscar, apple, dark).my_all?(/b/)
+[1, 2i, 3.14].my_all?(Numeric) 
+
+#[0, 0, 0, 1, 2, 0].my_none {|i| i > 1}
+
+
 

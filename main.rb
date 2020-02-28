@@ -1,10 +1,15 @@
 module Enumerable
 
-  def my_each
-    arr = self
-    if self.class == Range
-      arr = self.to_a
+  def make_array(input)
+    if input.class == Range
+      input.to_a
+    else
+      input
     end
+  end
+
+  def my_each
+    arr = make_array(self)
     if block_given?
       for i in (0..arr.length-1) do
         yield(arr[i])
@@ -14,31 +19,46 @@ module Enumerable
     end
   end
 
-  def my_each_with_index
+  def my_each_2
+    arr = make_array(self)
     if block_given?
-      [0..length - 1].my_each {|i| yield(self[i],i)}
+      for i in (1..arr.length-1) do
+        yield(arr[i])
+      end  
     else
-      self.to_enum
+      arr.to_enum
+    end
+  end
+
+  def my_each_with_index
+    arr = make_array(self)
+    if block_given?
+      [0..arr.length - 1].my_each {|i| yield(arr[i],i)}
+    else
+      arr.to_enum
     end
   end 
 
   def my_select
+    arr = make_array(self)
     if block_given?
       output = Array.new
-      self.my_each {|i| output << i if yield(i)}
+      arr.my_each {|i| output << i if yield(i)}
       output
     else
-      self.to_enum
+      arr.to_enum
     end
   end
 
   def my_all_check
-    self.my_each { |i| return false unless yield(i) }
+    arr = make_array(self)
+    arr.my_each { |i| return false unless yield(i) }
     true
   end
 
   def my_none_check
-    self.my_each { |i| return false if yield(i) }
+    arr = make_array(self)
+    arr.my_each { |i| return false if yield(i) }
     true
   end
 
@@ -67,25 +87,55 @@ module Enumerable
   end
 
   def my_count
+    arr = make_array(self)
     if block_given?
       count = 0
-      self.my_each {|i| count += 1 if yield(i)}
+      arr.my_each {|i| count += 1 if yield(i)}
       count
     else
-      length
+      arr.length
     end
   end
 
   def my_map
+    arr = make_array(self)
     if block_given?
       output = Array.new
-      self.my_each {|i| output << i if yield(i)}
+      arr.my_each {|i| output << i if yield(i)}
       output
     else
-      self.to_enum
+      arr.to_enum
     end
   end
 
+  def my_inject(first = nil, second = nil)
+    arr = make_array(self)
+    accum = arr[0]
+    if first.class == Symbol
+      arr.my_each_2 { |i| accum = accum.send(first, i) }
+      accum
+    elsif !first.nil? && second.nil?
+      if block_given?
+        accum = first
+        arr.my_each { |i| accum = yield(accum, i) }
+        accum
+      end
+    elsif !first.nil? && second.class == Symbol
+      accum = first
+      arr.my_each { |i| accum = accum.send(second, i) }
+      accum
+    elsif first.nil? && second.nil?
+      if block_given?
+        arr.my_each_2 { |i| accum = yield(accum, i) }
+        accum
+      end
+    end
+  end
+
+end
+
+def multiply_els(input)
+  input.my_inject(:*)
 end
 
 [1, 2, 3, 4].my_each {|x| puts "number: #{x}"}
@@ -109,4 +159,18 @@ ary.count{ |x| x%2==0 } #=> 3
 
 (1..10).my_map { |i| i * 2 if i.even? } #=> [4, 8, 12, 16, 20]
 
+# Sum some numbers
+(5..10).my_inject(:+)                             #=> 45
+# Same using a block and inject
+(5..10).my_inject { |sum, n| sum + n }            #=> 45
+# Multiply some numbers
+(5..10).my_inject(1, :*)                          #=> 151200
+# Same using a block
+(5..10).my_inject(1) { |product, n| product * n } #=> 151200
+# find the longest word
+longest = %w{ cat sheep bear }.my_inject do |memo, word|
+   memo.length > word.length ? memo : word
+end
+longest                                        #=> "sheep"
 
+multiply_els([2,4,5])

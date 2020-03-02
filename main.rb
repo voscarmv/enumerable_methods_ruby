@@ -40,7 +40,7 @@ module Enumerable
   def my_each_with_index
     arr = make_array(self)
     if block_given?
-      [0..arr.length - 1].my_each { |i| yield(arr[i], i) }
+      (0..arr.length - 1).my_each { |i| yield(arr[i], i) }
     else
       arr.to_enum
     end
